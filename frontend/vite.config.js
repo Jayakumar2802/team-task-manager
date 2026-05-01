@@ -3,7 +3,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+
   server: {
+    host: true,
     port: 3000,
     proxy: {
       '/api': {
@@ -11,5 +13,11 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+  },
+
+  preview: {
+    host: true,
+    port: 4173,
+    allowedHosts: true, // ✅ THIS FIXES RAILWAY ERROR
   },
 })
