@@ -24,7 +24,14 @@ export default function Login() {
       toast.success('Login successful!')
       navigate('/')
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Login failed')
+      const serverDetail = error.response?.data?.detail
+      const isNetworkError = !error.response
+      toast.error(
+        serverDetail ||
+          (isNetworkError
+            ? 'Cannot reach backend (start backend on http://localhost:8000)'
+            : 'Login failed')
+      )
     } finally {
       setLoading(false)
     }

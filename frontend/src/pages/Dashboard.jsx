@@ -118,7 +118,9 @@ export default function Dashboard() {
               {stats.tasks_due_soon.map((task) => (
                 <div key={task.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
                   <span className="font-medium text-gray-800 dark:text-gray-200">{task.title}</span>
-                  <span className="text-sm font-bold text-red-500">{task.due_date.split('T')[0]}</span>
+                  <span className="text-sm font-bold text-red-500">
+                    {task.due_date ? String(task.due_date).split('T')[0] : '—'}
+                  </span>
                 </div>
               ))}
             </div>

@@ -15,7 +15,17 @@ API.interceptors.request.use((config) => {
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // If the backend is down / unreachable, error.response is undefined.
+    // Let the caller show a useful message instead of hard redirecting.
+    if (!error.response) {
+      return Promise.reject(error)
+    }
+
+    // Avoid redirect loop when the /auth/login request itself returns 401.
+    const requestUrl = String(error.config?.url || '')
+    const isAuthLoginCall = requestUrl.includes('/auth/login')
+
+    if (error.response?.status === 401 && !isAuthLoginCall) {
       localStorage.removeItem('token')
       window.location.href = '/login'
     }
