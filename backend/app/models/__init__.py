@@ -3,6 +3,13 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 import datetime
 
+# ✅ Define ENUMS with names (IMPORTANT for PostgreSQL)
+user_role_enum = Enum('admin', 'member', name='user_role')
+project_role_enum = Enum('admin', 'member', name='project_role')
+task_priority_enum = Enum('low', 'medium', 'high', name='task_priority')
+task_status_enum = Enum('todo', 'in_progress', 'done', name='task_status')
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -10,7 +17,7 @@ class User(Base):
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
-    role = Column(Enum('admin', 'member'), default='member')
+    role = Column(user_role_enum, default='member')
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
 
@@ -40,7 +47,7 @@ class ProjectMember(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    role = Column(Enum('admin', 'member'), default='member')
+    role = Column(project_role_enum, default='member')
     joined_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     user = relationship("User", back_populates="project_memberships")
@@ -54,8 +61,8 @@ class Task(Base):
     title = Column(String(255), nullable=False)
     description = Column(Text)
     due_date = Column(DateTime, nullable=True)
-    priority = Column(Enum('low', 'medium', 'high'), default='medium')
-    status = Column(Enum('todo', 'in_progress', 'done'), default='todo')
+    priority = Column(task_priority_enum, default='medium')
+    status = Column(task_status_enum, default='todo')
     assigned_to = Column(Integer, ForeignKey("users.id"), nullable=True)
     project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
     created_by = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -68,8 +75,10 @@ class Task(Base):
     comments = relationship("Comment", back_populates="task", cascade="all, delete-orphan")
     attachments = relationship("Attachment", back_populates="task", cascade="all, delete-orphan")
 
+
 class Comment(Base):
     __tablename__ = "comments"
+
     id = Column(Integer, primary_key=True, index=True)
     task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
@@ -79,8 +88,10 @@ class Comment(Base):
     task = relationship("Task", back_populates="comments")
     user = relationship("User")
 
+
 class Notification(Base):
     __tablename__ = "notifications"
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     message = Column(Text, nullable=False)
@@ -89,8 +100,10 @@ class Notification(Base):
 
     user = relationship("User")
 
+
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
+
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
@@ -100,8 +113,10 @@ class ActivityLog(Base):
     project = relationship("Project")
     user = relationship("User")
 
+
 class Attachment(Base):
     __tablename__ = "attachments"
+
     id = Column(Integer, primary_key=True, index=True)
     task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
     file_path = Column(String(512), nullable=False)
